@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Your meetings · Converge Partner Surgeries</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --paper:#F5F6F8; --ink:#141829; --indigo:#2C3A87; --indigo-soft:#EAEDF7;
+  --teal:#0E7C66; --coral:#E2613B; --coral-soft:#FCEDE6; --slate:#5A6377;
+  --hair:#E4E7EE; --card:#FFFFFF;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:28px 20px 64px}
+.eyebrow{font-family:"Space Grotesk";font-weight:600;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--indigo);margin:0 0 6px}
+h1{font-family:"Space Grotesk";font-weight:700;font-size:32px;line-height:1.05;margin:0 0 4px;letter-spacing:-.01em}
+.lede{color:var(--slate);font-size:15px;margin:0 0 22px}
+.field{position:relative;margin-bottom:8px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--slate);margin:0 0 7px}
+#q{width:100%;font-family:Inter;font-size:17px;padding:15px 16px;border:1.5px solid var(--hair);
+  border-radius:13px;background:var(--card);color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+#q::placeholder{color:#9aa1b1}
+#q:focus{border-color:var(--indigo);box-shadow:0 0 0 4px var(--indigo-soft)}
+.matches{list-style:none;margin:6px 0 0;padding:0;border:1px solid var(--hair);border-radius:13px;
+  overflow:hidden;background:var(--card);box-shadow:0 8px 26px rgba(20,24,41,.07);display:none}
+.matches.open{display:block}
+.matches li{padding:13px 16px;font-size:16px;cursor:pointer;border-bottom:1px solid var(--hair)}
+.matches li:last-child{border-bottom:none}
+.matches li:hover,.matches li[aria-selected="true"]{background:var(--indigo-soft)}
+
+.result{margin-top:26px;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.result.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.result{transition:none}}
+.biz{font-family:"Space Grotesk";font-weight:700;font-size:24px;letter-spacing:-.01em;margin:0}
+.contact{color:var(--slate);font-size:14px;margin:2px 0 20px}
+
+/* itinerary rail = signature */
+.rail{position:relative;margin:0;padding:0 0 0 4px;list-style:none}
+.stop{position:relative;display:grid;grid-template-columns:64px 1fr;gap:16px;padding:0 0 22px}
+.stop:last-child{padding-bottom:0}
+.stop::before{content:"";position:absolute;left:31px;top:30px;bottom:-4px;width:2px;background:var(--hair)}
+.stop:last-child::before{display:none}
+.time{font-family:"Space Grotesk";font-weight:700;font-size:15px;color:#fff;background:var(--indigo);
+  height:62px;border-radius:13px;display:flex;align-items:center;justify-content:center;text-align:center;
+  letter-spacing:.01em;box-shadow:0 4px 12px rgba(44,58,135,.22);position:relative;z-index:1}
+.card2{background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:12px 15px;align-self:start}
+.partner{font-weight:600;font-size:16px;margin:0}
+.psub{color:var(--slate);font-size:13px;margin:1px 0 0}
+.desk{display:inline-block;margin-top:9px;font-family:"IBM Plex Mono",monospace;font-size:12px;
+  color:var(--indigo);background:var(--indigo-soft);padding:3px 9px;border-radius:7px;letter-spacing:.02em}
+
+.tip{margin-top:20px;background:var(--coral-soft);border:1px solid #F3D2C4;border-radius:13px;
+  padding:14px 16px;display:flex;gap:12px}
+.tip svg{flex:0 0 auto;margin-top:1px}
+.tip p{margin:0;font-size:14px;color:#7a3015}
+.tip b{color:var(--coral)}
+
+.empty{margin-top:30px;color:var(--slate);font-size:15px;text-align:center;
+  border:1.5px dashed var(--hair);border-radius:14px;padding:34px 20px}
+.empty strong{color:var(--ink);display:block;font-family:"Space Grotesk";font-size:17px;margin-bottom:4px}
+
+.foot{margin-top:46px;padding-top:18px;border-top:1px solid var(--hair);font-size:13px;color:var(--slate);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.foot a{color:var(--indigo);font-weight:600;text-decoration:none;cursor:pointer}
+.foot a:hover{text-decoration:underline}
+
+/* organiser / QR view */
+.qrhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.btn{font-family:Inter;font-weight:600;font-size:14px;color:#fff;background:var(--indigo);border:none;
+  padding:11px 16px;border-radius:11px;cursor:pointer}
+.btn:hover{background:#243072}
+.note{font-size:13px;color:var(--slate);margin:6px 0 22px;max-width:480px}
+.warn{background:#FFF8E6;border:1px solid #F0E0AE;color:#6b5512;border-radius:11px;padding:11px 14px;font-size:13px;margin:0 0 22px}
+.master{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:18px;text-align:center;margin:0 0 26px}
+.master .qbox{display:inline-block}
+.master h3{font-family:"Space Grotesk";margin:0 0 4px;font-size:16px}
+.master p{margin:0;color:var(--slate);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.qcard{background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:14px 12px;text-align:center;
+  break-inside:avoid;page-break-inside:avoid}
+.qcard .name{font-family:"Space Grotesk";font-weight:600;font-size:13px;margin:10px 0 0;line-height:1.25}
+.qcard svg,.master svg{width:100%;height:auto;display:block}
+.master svg{width:150px;margin:0 auto}
+
+@media print{
+  body{background:#fff}
+  .wrap{max-width:none;padding:0}
+  .noprint{display:none!important}
+  .grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .qcard{border:1px solid #ccc}
+  .master{border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ATTENDEE VIEW -->
+  <section id="attendee">
+    <p class="eyebrow">Converge · Partner Surgeries</p>
+    <h1>Your meetings</h1>
+    <p class="lede">Find your venture below to see your three partner surgeries, with times and tables.</p>
+
+    <div class="field">
+      <label for="q">Your venture</label>
+      <input id="q" type="text" autocomplete="off" placeholder="Start typing your venture name…" aria-expanded="false" aria-controls="matches" role="combobox"/>
+      <ul id="matches" class="matches" role="listbox"></ul>
+    </div>
+
+    <div id="result" class="result" aria-live="polite"></div>
+
+    <div id="empty" class="empty">
+      <strong>Tap your venture name</strong>
+      Search above to pull up your schedule for the day.
+    </div>
+
+    <div class="foot noprint">
+      <span>Times are fixed; please arrive a couple of minutes early.</span>
+      <a id="toQR">Organiser: QR codes →</a>
+    </div>
+  </section>
+
+  <!-- ORGANISER / QR VIEW -->
+  <section id="organiser" style="display:none">
+    <div class="qrhead">
+      <div>
+        <p class="eyebrow">Converge · Partner Surgeries</p>
+        <h1>QR codes</h1>
+      </div>
+      <button class="btn noprint" id="printBtn">Print these</button>
+    </div>
+    <p class="note">Each venture's code opens straight to their own schedule. The big one opens the search page so anyone can look themselves up. Print and place on tables or badges.</p>
+    <div id="hostwarn" class="warn noprint" style="display:none"></div>
+
+    <div class="master">
+      <div class="qbox" id="masterQR"></div>
+      <h3>Look up any venture</h3>
+      <p>Opens the search page</p>
+    </div>
+
+    <div class="grid" id="qrGrid"></div>
+
+    <div class="foot noprint">
+      <a id="toAttendee">← Back to schedule lookup</a>
+    </div>
+  </section>
+
+</div>
+
+<script id="data" type="application/json">{"ALICS":{"meetings":[{"time":"11:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"11:45","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"13:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"}],"tips":[],"contact":"Dr Hamish Dow"},"ANN.Energy":{"meetings":[{"time":"13:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"14:00","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"15:15","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":[],"contact":"Mohammad Asad Mansoori"},"AgriLibra":{"meetings":[{"time":"14:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"15:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"15:45","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Andrew Christie"},"Box of Greebles":{"meetings":[{"time":"14:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"15:45","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"16:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"}],"tips":[],"contact":"Thomas Welsh"},"BridgeIt":{"meetings":[{"time":"11:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"11:45","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"12:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"}],"tips":[],"contact":"Patricia Pfau"},"CCS Ecosystem":{"meetings":[{"time":"11:15","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"11:45","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"},{"time":"12:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"}],"tips":[],"contact":"Ednilson Mburine"},"CatStream":{"meetings":[{"time":"9:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"10:00","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"10:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"}],"tips":[],"contact":"Lynn Otugha"},"Catalyst Neuromorphic":{"meetings":[{"time":"12:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"13:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"14:00","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"}],"tips":[],"contact":"Henry Shulayev-Barnes"},"Cohortize":{"meetings":[{"time":"14:00","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"14:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"15:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"}],"tips":[],"contact":"Benjamin Nkere"},"Compendo":{"meetings":[{"time":"9:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"10:00","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"10:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"}],"tips":[],"contact":"Clément Godbarge"},"CryoTorq":{"meetings":[{"time":"9:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"10:00","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"10:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"}],"tips":["You ranked i4PD #3 but they were fully booked. They're only free at breaks. Best chance: Morning break (11:00) — your last meeting is just before — catch them right at the break."],"contact":"Alexander"},"Cyberhare":{"meetings":[{"time":"15:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"15:45","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"16:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"}],"tips":[],"contact":"Stephen Langston"},"EquiRisk":{"meetings":[{"time":"11:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"11:45","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"12:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"}],"tips":[],"contact":"Ewan McGarrie"},"FALCON":{"meetings":[{"time":"9:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"10:00","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"10:30","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":["You ranked i4PD #3 but they were fully booked. They're only free at breaks. Best chance: Morning break (11:00) — your last meeting is just before — catch them right at the break."],"contact":"Zoe Yang"},"FreeForm Photonics":{"meetings":[{"time":"14:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"15:45","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"16:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"}],"tips":[],"contact":"Calum Ross"},"FussEat":{"meetings":[{"time":"14:00","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"14:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"15:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Morven Summers"},"Games on Toast":{"meetings":[{"time":"14:00","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"},{"time":"14:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"15:15","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Agnes Branny"},"Grohwie":{"meetings":[{"time":"13:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"14:00","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"14:30","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":[],"contact":"Mirabelle Morah"},"Know Your Music":{"meetings":[{"time":"10:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"11:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"11:45","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Serign Sanneh"},"LAF Media":{"meetings":[{"time":"15:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"15:45","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"16:15","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":[],"contact":"Johanna Denke"},"LaserSpectra":{"meetings":[{"time":"11:45","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"12:15","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"13:30","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Yuan Chen"},"Maricene":{"meetings":[{"time":"11:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 1"},{"time":"11:45","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"12:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"}],"tips":[],"contact":"Kartikay"},"MindSilicaAI":{"meetings":[{"time":"14:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"15:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"15:45","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Mohammed"},"Movementguard":{"meetings":[{"time":"12:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"13:30","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"14:00","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Nazia Gillani"},"PerovGraph":{"meetings":[{"time":"9:30","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"},{"time":"10:00","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"},{"time":"10:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"}],"tips":[],"contact":"Sandeep Pandey"},"Perpetual Machines":{"meetings":[{"time":"14:00","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"14:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"16:15","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Shayan Majumder"},"Phase Vector":{"meetings":[{"time":"9:30","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"10:00","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"},{"time":"10:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Seyedahmad Hosseini"},"PlanetFix":{"meetings":[{"time":"9:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"},{"time":"10:00","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"10:30","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Rushdi Senevirathne"},"Pointcanvas":{"meetings":[{"time":"13:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"14:00","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"15:45","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"}],"tips":[],"contact":"Dr Toa Pecur"},"Portora":{"meetings":[{"time":"15:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"15:45","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"16:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"}],"tips":[],"contact":"Xingyi Du"},"Printerpose":{"meetings":[{"time":"15:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"},{"time":"15:45","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"16:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"}],"tips":["You ranked i4PD #2 but they were fully booked. They're only free at breaks. Best chance: Afternoon break (15:00) — you arrive just after this break."],"contact":"Jonathon harwell"},"Quantinance":{"meetings":[{"time":"9:30","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"10:00","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 1"},{"time":"10:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 1"}],"tips":[],"contact":"Hugo Spinola"},"R&B Engineering":{"meetings":[{"time":"11:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"11:45","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"12:15","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"}],"tips":[],"contact":"Angel Barroyeta"},"RapidSOH":{"meetings":[{"time":"11:15","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"},{"time":"11:45","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"},{"time":"12:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"}],"tips":[],"contact":"Patrick Umeadi"},"Realtime Roads":{"meetings":[{"time":"10:00","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 1"},{"time":"10:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"11:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Morgan Skillicorn"},"SABRAIN":{"meetings":[{"time":"15:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"15:45","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"16:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Yazmin Caceres-Fegrero"},"Scensai":{"meetings":[{"time":"11:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"11:45","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"12:15","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"Ammar Elhoweris"},"Scotseal":{"meetings":[{"time":"9:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 1"},{"time":"10:00","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"10:30","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"}],"tips":[],"contact":"Scott Rutherford"},"Shift Gallery":{"meetings":[{"time":"9:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"10:00","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"},{"time":"10:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"}],"tips":[],"contact":"Moa Hjärre Nettleton"},"SimPatient":{"meetings":[{"time":"10:00","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"11:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"11:45","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"}],"tips":["You ranked i4PD #2 but they were fully booked. They're only free at breaks. Best chance: Morning break (11:00) — you arrive just after this break."],"contact":"Sayed Murad"},"Space for Sound":{"meetings":[{"time":"11:15","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"11:45","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"12:15","code":"HLK","partner":"HLK — IP","sub":"Intellectual property","table":"HLK 2"}],"tips":[],"contact":"Jo Tait"},"TA Technology":{"meetings":[{"time":"13:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"},{"time":"14:00","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"14:30","code":"I4","partner":"i4PD","sub":"Product design","table":"i4PD"}],"tips":[],"contact":"David Campos-Gaona"},"TauBioGenix":{"meetings":[{"time":"13:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"14:00","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"14:30","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"}],"tips":[],"contact":"Mohammad Arastoo"},"Virtual IMR":{"meetings":[{"time":"12:15","code":"SE","partner":"Scottish Enterprise","sub":"Innovation team","table":"SE 2"},{"time":"13:30","code":"MBM","partner":"MBM — Legal","sub":"","table":"MBM 2"},{"time":"14:00","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":[],"contact":"Robert Sykes"},"WombWise":{"meetings":[{"time":"14:30","code":"CT","partner":"CT — Accountants","sub":"","table":"CT 2"},{"time":"15:15","code":"DL","partner":"Data Lab","sub":"","table":"Data Lab 2"},{"time":"15:45","code":"FF","partner":"Firefinch","sub":"Software development","table":"Firefinch"}],"tips":[],"contact":"Emily Youngs"}}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const NAMES = Object.keys(DATA).sort((a,b)=>a.localeCompare(b));
+
+/* ---------- attendee lookup ---------- */
+const q=document.getElementById('q'), matches=document.getElementById('matches'),
+      result=document.getElementById('result'), empty=document.getElementById('empty');
+
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function render(name){
+  const d=DATA[name]; if(!d) return;
+  empty.style.display='none';
+  const stops=d.meetings.map(m=>`
+    <li class="stop">
+      <div class="time">${esc(m.time)}</div>
+      <div class="card2">
+        <p class="partner">${esc(m.partner)}</p>
+        ${m.sub?`<p class="psub">${esc(m.sub)}</p>`:''}
+        <span class="desk">Table ${esc(m.table)}</span>
+      </div>
+    </li>`).join('');
+  const tips=d.tips.map(t=>`
+    <div class="tip">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#E2613B" stroke-width="2"/><path d="M12 7v6M12 16.5v.5" stroke="#E2613B" stroke-width="2" stroke-linecap="round"/></svg>
+      <p>${esc(t).replace('Best chance','<b>Best chance</b>')}</p>
+    </div>`).join('');
+  result.innerHTML=`<p class="biz">${esc(name)}</p>${d.contact?`<p class="contact">${esc(d.contact)}</p>`:''}<ul class="rail">${stops}</ul>${tips}`;
+  result.classList.add('show');
+  history.replaceState(null,'', '?b='+encodeURIComponent(name));
+}
+function closeList(){matches.classList.remove('open');matches.innerHTML='';q.setAttribute('aria-expanded','false');}
+function showList(items){
+  if(!items.length){closeList();return;}
+  matches.innerHTML=items.slice(0,8).map(n=>`<li role="option">${esc(n)}</li>`).join('');
+  matches.classList.add('open');q.setAttribute('aria-expanded','true');
+  [...matches.children].forEach(li=>li.onclick=()=>{q.value=li.textContent;closeList();render(li.textContent);});
+}
+q.addEventListener('input',()=>{
+  const v=q.value.trim().toLowerCase();
+  if(!v){closeList();return;}
+  showList(NAMES.filter(n=>n.toLowerCase().includes(v)));
+});
+q.addEventListener('focus',()=>{if(q.value.trim())q.dispatchEvent(new Event('input'));});
+document.addEventListener('click',e=>{if(!e.target.closest('.field'))closeList();});
+
+/* ---------- view switching ---------- */
+const attendee=document.getElementById('attendee'), organiser=document.getElementById('organiser');
+function baseURL(){return location.origin+location.pathname;}
+function showQR(){
+  attendee.style.display='none';organiser.style.display='block';
+  history.replaceState(null,'','?qr');buildQRs();window.scrollTo(0,0);
+}
+function showAttendee(){
+  organiser.style.display='none';attendee.style.display='block';
+  history.replaceState(null,'',location.pathname);window.scrollTo(0,0);
+}
+document.getElementById('toQR').onclick=showQR;
+document.getElementById('toAttendee').onclick=showAttendee;
+document.getElementById('printBtn').onclick=()=>window.print();
+
+/* ---------- QR building ---------- */
+function svgFor(text,cell){
+  const qr=qrcode(0,'M');qr.addData(text);qr.make();
+  return qr.createSvgTag({cellSize:cell||4,margin:2,scalable:true});
+}
+let built=false;
+function buildQRs(){
+  if(built) return; built=true;
+  if(location.protocol==='file:'){
+    const w=document.getElementById('hostwarn');
+    w.style.display='block';
+    w.innerHTML='This file is open locally, so the codes below point to a file path that only works on this computer. Put the file online first (any web host), then reopen this page there — the codes will then point to the live address automatically.';
+  }
+  document.getElementById('masterQR').innerHTML=svgFor(baseURL(),5);
+  document.getElementById('qrGrid').innerHTML=NAMES.map(n=>
+    `<div class="qcard">${svgFor(baseURL()+'?b='+encodeURIComponent(n))}<p class="name">${esc(n)}</p></div>`
+  ).join('');
+}
+
+/* ---------- deep links on load ---------- */
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.has('qr')){showQR();return;}
+  const b=p.get('b');
+  if(b && DATA[b]){q.value=b;render(b);}
+})();
+</script>
+</body>
+</html>
